@@ -1,6 +1,15 @@
+import type { InputFile } from "grammy";
+
+export interface MediaGroup {
+    type: 'photo' | 'video';
+    media: string | InputFile;
+    caption?: string;
+}
+
 export interface MessageAnswer {
-    content: string;
-    type: "text" | "voice" | "video" | "video-note" | "image" | "doc";
+    content?: string;
+    contents?: string[]; 
+    type: "text" | "voice" | "video" | "video-note" | "image" | "doc" | "gallery";
 }
 
 export interface MessageButton {

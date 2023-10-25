@@ -1,27 +1,44 @@
 import { Context, InputFile, InlineKeyboard } from "grammy";
 import { Answer } from "../types/answer";
-import type { MessageAnswer } from "../types/answer";
+import type { MessageAnswer, MediaGroup } from "../types/answer";
 
 export async function send_answer_message(ctx: Context, messageAnswer: MessageAnswer, inlineKeyboard: InlineKeyboard | undefined = undefined): Promise<void> {
     const chat_id = ctx.chat ? ctx.chat.id : null;
     if (chat_id != null) {
         if (messageAnswer.type === "text") {
-            await ctx.reply(messageAnswer.content, { reply_markup: inlineKeyboard });
+            if (messageAnswer.content != null) {
+                await ctx.reply(messageAnswer.content, { reply_markup: inlineKeyboard });
+            }
         } else {
             try {
                 const loader_message = await ctx.reply('🚀Загрузка вложения...🚀');
 
-                const asset = new InputFile(messageAnswer.content);
-                if (messageAnswer.type === 'voice') {
-                    await ctx.api.sendVoice(chat_id, asset, { reply_markup: inlineKeyboard });
-                } else if (messageAnswer.type === 'video') {
-                    await ctx.api.sendVideo(chat_id, asset, { reply_markup: inlineKeyboard });
-                } else if (messageAnswer.type === 'video-note') {
-                    await ctx.api.sendVideoNote(chat_id, asset, { reply_markup: inlineKeyboard });
-                } else if (messageAnswer.type === 'image') {
-                    await ctx.api.sendPhoto(chat_id, asset, { reply_markup: inlineKeyboard });
-                } else if (messageAnswer.type === 'doc') {
-                    await ctx.api.sendDocument(chat_id, asset, { reply_markup: inlineKeyboard });
+                if (messageAnswer.type !== "gallery" && messageAnswer.content != null) {
+                    const asset = new InputFile(messageAnswer.content);
+
+                    if (messageAnswer.type === 'voice') {
+                        await ctx.api.sendVoice(chat_id, asset, { reply_markup: inlineKeyboard });
+                    } else if (messageAnswer.type === 'video') {
+                        await ctx.api.sendVideo(chat_id, asset, { reply_markup: inlineKeyboard });
+                    } else if (messageAnswer.type === 'video-note') {
+                        await ctx.api.sendVideoNote(chat_id, asset, { reply_markup: inlineKeyboard });
+                    } else if (messageAnswer.type === 'image') {
+                        await ctx.api.sendPhoto(chat_id, asset, { reply_markup: inlineKeyboard });
+                    } else if (messageAnswer.type === 'doc') {
+                        await ctx.api.sendDocument(chat_id, asset, { reply_markup: inlineKeyboard });
+                    }
+                } else {
+                    if (messageAnswer.contents != null) {
+                        const assets: MediaGroup[] = [];
+                        for (let content of messageAnswer.contents) {
+                            assets.push({
+                                type: 'photo',
+                                media: new InputFile(content)
+                            })
+                        }
+
+                        await ctx.api.sendMediaGroup(chat_id, assets)
+                    }
                 }
 
                 ctx.api.deleteMessage(chat_id, loader_message.message_id);
