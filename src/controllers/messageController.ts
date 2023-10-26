@@ -19,7 +19,7 @@ export async function send_answer_message(ctx: Context, messageAnswer: MessageAn
                     if (messageAnswer.type === 'voice') {
                         await ctx.api.sendVoice(chat_id, asset, { reply_markup: inlineKeyboard });
                     } else if (messageAnswer.type === 'video') {
-                        await ctx.api.sendVideo(chat_id, asset, { reply_markup: inlineKeyboard });
+                        await ctx.api.sendVideo(chat_id, asset, { reply_markup: inlineKeyboard, supports_streaming: true });
                     } else if (messageAnswer.type === 'video-note') {
                         await ctx.api.sendVideoNote(chat_id, asset, { reply_markup: inlineKeyboard });
                     } else if (messageAnswer.type === 'image') {
